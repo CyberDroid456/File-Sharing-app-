@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Preview: {{ filename }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .preview-container {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin: 20px auto;
+            max-width: 90%;
+        }
+        .preview-image {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .preview-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Image Preview: {{ filename }}</h1>
+        <div>
+            <a href="{{ url_for('index') }}">🏠 Home</a>
+            <a href="{{ url_for('download', filename=filename) }}">💾 Download</a>
+            <a href="javascript:history.back()">⬅ Back</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="preview-container">
+            <img src="{{ url_for('download', filename=filename) }}" 
+                 alt="{{ filename }}" 
+                 class="preview-image"
+                 onerror="this.style.display='none'; document.getElementById('error-message').style.display='block';">
+            
+            <div id="error-message" style="display: none; color: #e53e3e; padding: 20px;">
+                <h3>⚠️ Cannot display image</h3>
+                <p>This image format may not be supported in the browser.</p>
+                <a href="{{ url_for('download', filename=filename) }}" class="download-btn">Download Instead</a>
+            </div>
+
+            <div class="preview-actions">
+                <a href="{{ url_for('download', filename=filename) }}" class="download-btn">Download Original</a>
+                <a href="javascript:history.back()" class="download-btn">Go Back</a>
+                <a href="{{ url_for('index') }}" class="download-btn">Home</a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

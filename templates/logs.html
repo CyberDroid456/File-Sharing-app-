@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Activity Logs</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <h1>Admin Activity Logs</h1>
+    <a href="{{ url_for('index') }}">⬅ Back to Home</a>
+    <a href="{{ url_for('download', filename='activity.log') }}" class="download-btn">Download Logs</a>
+  </header>
+
+  <main class="container">
+    {% if logs %}
+      <table class="log-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>User</th>
+            <th>Action</th>
+            <th>File</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for line in logs %}
+            {% set parts = line.strip().split(" ", 3) %}
+            <tr>
+              <td>{{ parts[0] ~ " " ~ parts[1] }}</td>
+              <td>{{ parts[2] }}</td>
+              <td>{{ parts[3].split()[0] if parts|length > 3 else '' }}</td>
+              <td>{{ parts[3].split()[1] if parts|length > 3 and parts[3].split()|length > 1 else '' }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No logs available.</p>
+    {% endif %}
+  </main>
+</body>
+</html>

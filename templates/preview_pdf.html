@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Preview: {{ filename }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .preview-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin: 20px auto;
+            max-width: 90%;
+            overflow: hidden;
+        }
+        .preview-header {
+            background: #5a67d8;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .pdf-viewer {
+            width: 100%;
+            height: 70vh;
+            border: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .preview-actions {
+            padding: 15px 20px;
+            background: #f7fafc;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .pdf-alternative {
+            padding: 40px;
+            text-align: center;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>PDF Preview: {{ filename }}</h1>
+        <div>
+            <a href="{{ url_for('index') }}">🏠 Home</a>
+            <a href="{{ url_for('download', filename=filename) }}">💾 Download</a>
+            <a href="javascript:history.back()">⬅ Back</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="preview-container">
+            <div class="preview-header">
+                <h3>{{ filename }}</h3>
+                <span>PDF Document</span>
+            </div>
+            
+            <iframe src="{{ url_for('download', filename=filename) }}#toolbar=0" 
+                    class="pdf-viewer"
+                    id="pdf-frame">
+            </iframe>
+            
+            <div class="pdf-alternative" id="pdf-alternative" style="display: none;">
+                <h3>⚠️ PDF cannot be displayed</h3>
+                <p>Your browser may not support embedded PDF viewing.</p>
+                <a href="{{ url_for('download', filename=filename) }}" class="download-btn">Download PDF</a>
+            </div>
+
+            <div class="preview-actions">
+                <a href="{{ url_for('download', filename=filename) }}" class="download-btn">Download</a>
+                <a href="javascript:history.back()" class="download-btn">Go Back</a>
+                <a href="{{ url_for('index') }}" class="download-btn">Home</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Check if PDF loaded successfully
+        document.getElementById('pdf-frame').onload = function() {
+            try {
+                const iframe = document.getElementById('pdf-frame');
+                if (iframe.contentDocument.body.innerHTML.includes('plugin')) {
+                    document.getElementById('pdf-alternative').style.display = 'block';
+                }
+            } catch (e) {
+                document.getElementById('pdf-alternative').style.display = 'block';
+            }
+        };
+        
+        document.getElementById('pdf-frame').onerror = function() {
+            document.getElementById('pdf-alternative').style.display = 'block';
+        };
+    </script>
+</body>
+</html>

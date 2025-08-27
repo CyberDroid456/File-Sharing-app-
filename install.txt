@@ -1,0 +1,15 @@
+# File Share App - Easy Setup
+1. Double-click start_flask.bat
+2. Open browser to http://localhost:5000
+3. Login with:
+   - Admin: admin / admin123
+   - User: user / user123
+
+# To Customize:
+Edit config.py with Notepad:
+- Change passwords in USERS section
+- Add new users in USERS section  
+- Change allowed file types in ALLOWED_EXTENSIONS
+- Change file size limit (MAX_FILE_SIZE)
+
+No coding knowledge needed!

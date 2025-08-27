@@ -1,0 +1,613 @@
+/* General */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0; 
+  padding: 0;
+  background: linear-gradient(135deg, #74ebd5, #9face6);
+  color: #333;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Header */
+header {
+  background: #2d3748; 
+  color: white;
+  padding: 15px 30px;
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #74ebd5;
+}
+
+header a {
+  color: #74ebd5;
+  text-decoration: none;
+  margin-left: 15px;
+  padding: 8px 15px;
+  border-radius: 5px;
+  transition: background 0.3s;
+}
+
+header a:hover {
+  background: rgba(116, 235, 213, 0.2);
+  text-decoration: none;
+}
+
+/* Login Page */
+.login-body {
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  padding: 20px;
+}
+
+.login-container {
+  background: white; 
+  padding: 30px;
+  border-radius: 15px; 
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  animation: fadeIn 0.8s ease-in;
+  width: 350px;
+}
+
+.login-container h2 {
+  text-align: center;
+  color: #4a5568;
+  margin-bottom: 25px;
+  font-size: 2rem;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #4a5568;
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"],
+.form-group input[type="file"] {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  border-color: #667eea;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+}
+
+.remember-me input {
+  margin-right: 10px;
+}
+
+.error-message {
+  background: #e53e3e;
+  color: white;
+  padding: 12px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Buttons */
+button, .delete-btn, .download-btn {
+  background: #5a67d8; 
+  color: white;
+  border: none; 
+  padding: 12px 20px;
+  border-radius: 8px; 
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+button:hover, .delete-btn:hover, .download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+button {
+  background: #5a67d8;
+  width: 100%;
+  margin-top: 10px;
+}
+
+button:hover {
+  background: #434190;
+}
+
+.delete-btn {
+  background: #e53e3e;
+  padding: 8px 15px;
+  font-size: 14px;
+}
+
+.delete-btn:hover {
+  background: #c53030;
+}
+
+.download-btn {
+  background: #38a169;
+  padding: 8px 15px;
+  font-size: 14px;
+  display: inline-block;
+}
+
+.download-btn:hover {
+  background: #2f855a;
+}
+
+/* Tables */
+.file-table, .log-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.file-table th, .file-table td,
+.log-table th, .log-table td {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.file-table th, .log-table th {
+  background: #5a67d8;
+  color: white;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
+.file-table tr:hover, .log-table tr:hover {
+  background: #f7fafc;
+}
+
+/* Flash messages */
+.flash-messages {
+  margin-bottom: 25px;
+}
+
+.flash-message {
+  background: #48bb78;
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.flash-message.error {
+  background: #e53e3e;
+}
+
+/* Toast */
+.toast {
+  visibility: hidden;
+  min-width: 250px;
+  background: #48bb78;
+  color: white;
+  text-align: center;
+  border-radius: 10px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1000;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  font-size: 16px;
+  font-weight: bold;
+  opacity: 0;
+  transition: all 0.4s;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.toast.show {
+  visibility: visible;
+  opacity: 1;
+  bottom: 60px;
+}
+
+.toast.error {
+  background: #e53e3e;
+}
+
+/* Form elements */
+form {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+}
+
+form h2 {
+  margin-top: 0;
+  color: #4a5568;
+}
+
+input[type="file"] {
+  padding: 10px;
+  border: 2px dashed #cbd5e0;
+  border-radius: 8px;
+  background: #f7fafc;
+  margin-bottom: 15px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(-30px) scale(0.95); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
+/* Links */
+a {
+  color: #5a67d8;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+a:hover {
+  color: #434190;
+  text-decoration: underline;
+}
+
+/* Section styling */
+section {
+  margin-bottom: 40px;
+  padding: 25px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+section h2 {
+  color: #4a5568;
+  margin-top: 0;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 10px;
+}
+
+/* Modal Buttons */
+.modal-button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.3s;
+  margin: 0 10px;
+}
+
+.modal-button.delete {
+  background: #e53e3e;
+  color: white;
+}
+
+.modal-button.delete:hover {
+  background: #c53030;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+}
+
+.modal-button.cancel {
+  background: #a0aec0;
+  color: white;
+}
+
+.modal-button.cancel:hover {
+  background: #718096;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(160, 174, 192, 0.3);
+}
+
+/* Upload Progress Styles */
+.upload-progress {
+  display: none;
+  margin: 15px 0;
+  background: #f0f0f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 20px;
+  background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+  width: 0%;
+  transition: width 0.3s ease;
+  border-radius: 10px;
+}
+
+.upload-status {
+  text-align: center;
+  margin-top: 5px;
+  font-weight: bold;
+  color: #4a5568;
+}
+
+.uploading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* File icons */
+.file-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  display: inline-block;
+  vertical-align: middle;
+  border-radius: 4px;
+}
+
+/* Different colors for different file types */
+.file-pdf { background-color: #e53e3e; }
+.file-image { background-color: #38a169; }
+.file-document { background-color: #3182ce; }
+.file-archive { background-color: #805ad5; }
+.file-other { background-color: #718096; }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+  
+  .container {
+    margin: 10px auto;
+    padding: 15px;
+    width: 95%;
+  }
+  
+  header {
+    flex-direction: column;
+    padding: 15px;
+    text-align: center;
+  }
+  
+  header h1 {
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+  }
+  
+  header div {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  
+  header a {
+    margin: 5px;
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+  
+  .login-body {
+    padding: 20px;
+    align-items: flex-start;
+    padding-top: 50px;
+  }
+  
+  .login-container {
+    width: 90%;
+    padding: 20px;
+  }
+  
+  .login-container h2 {
+    font-size: 1.6rem;
+  }
+  
+  form {
+    padding: 20px;
+  }
+  
+  input[type="text"],
+  input[type="password"],
+  input[type="file"] {
+    font-size: 16px;
+    padding: 14px;
+  }
+  
+  button {
+    padding: 14px 20px;
+    font-size: 16px;
+  }
+  
+  .file-table, .log-table {
+    font-size: 14px;
+  }
+  
+  .file-table th, .file-table td,
+  .log-table th, .log-table td {
+    padding: 10px 8px;
+  }
+  
+  .file-table td {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .download-btn, .delete-btn {
+    text-align: center;
+    padding: 10px;
+    font-size: 13px;
+  }
+  
+  section {
+    padding: 20px;
+    margin-bottom: 25px;
+  }
+  
+  section h2 {
+    font-size: 1.3rem;
+  }
+  
+  .flash-message {
+    padding: 12px;
+    font-size: 14px;
+  }
+  
+  .toast {
+    min-width: 90%;
+    font-size: 14px;
+    padding: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  header h1 {
+    font-size: 1.2rem;
+  }
+  
+  .login-container h2 {
+    font-size: 1.4rem;
+  }
+  
+  .file-table {
+    font-size: 12px;
+  }
+  
+  .file-table th, .file-table td {
+    padding: 8px 6px;
+  }
+  
+  .file-table thead {
+    display: none;
+  }
+  
+  .file-table tr {
+    display: block;
+    margin-bottom: 15px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .file-table td {
+    display: block;
+    text-align: center;
+    padding: 12px;
+  }
+  
+  .file-table td:first-child {
+    font-weight: bold;
+    background: #f7fafc;
+    border-bottom: 1px solid #e2e8f0;
+  }
+}
+
+/* Mobile-specific touch improvements */
+@media (hover: none) {
+  button:hover, .delete-btn:hover, .download-btn:hover {
+    transform: none;
+  }
+  
+  button:active, .delete-btn:active, .download-btn:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+/* Prevent zoom on input focus for iOS */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="password"],
+  input[type="file"],
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Mobile login page specific fixes */
+@keyframes mobileFadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px) scale(0.98); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+/* Preview button style */
+.preview-btn {
+    background: #6b46c1;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    display: inline-block;
+    transition: all 0.3s;
+}
+
+.preview-btn:hover {
+    background: #553c9a;
+    transform: translateY(-2px);
+}
+
+/* Spinner for loading */
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #5a67d8;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

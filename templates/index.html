@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>File Sharing Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</head>
+<body>
+  <header>
+    <h1>Welcome, {{ user }} ({{ role }})</h1>
+    <div>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for message in messages %}
+            <div class="flash-message">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Upload Section -->
+    <section>
+      <h2>Upload a File</h2>
+      <form id="uploadForm" action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" id="fileInput" required>
+        <button type="submit" id="uploadButton">Upload</button>
+        
+        <!-- Progress Bar -->
+        <div class="upload-progress" id="uploadProgress">
+          <div class="progress-bar" id="progressBar"></div>
+          <div class="upload-status" id="uploadStatus">Uploading...</div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Folder Creation Section -->
+    <section>
+      <h2>Organize Files</h2>
+      <form id="createFolderForm" action="{{ url_for('create_folder') }}" method="POST">
+        <input type="text" name="folder_name" placeholder="Enter folder name" required>
+        <button type="submit">Create Folder</button>
+      </form>
+    </section>
+
+    <!-- Search Section -->
+    <div style="margin: 20px 0;">
+      <input type="text" id="fileSearch" placeholder="🔍 Search files..." 
+             style="padding: 10px; width: 100%; border-radius: 8px; border: 2px solid #e2e8f0;">
+    </div>
+
+    <!-- File List Section -->
+    <section>
+      <h2>Available Files</h2>
+      {% if files %}
+        <table class="file-table">
+          <thead>
+            <tr>
+              <th>Filename</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for file in files %}
+              <tr>
+                <td>
+                  {% set ext = file.name.split('.')[-1].lower() if '.' in file.name else 'folder' %}
+                  <span class="file-icon 
+                    {% if ext in ['pdf'] %}file-pdf
+                    {% elif ext in ['png', 'jpg', 'jpeg', 'gif'] %}file-image  
+                    {% elif ext in ['doc', 'docx', 'txt'] %}file-document
+                    {% elif ext in ['zip', 'rar'] %}file-archive
+                    {% else %}file-other{% endif %}">
+                  </span>
+                  {{ file.name }}
+                  <br><small style="color: #666;">{{ file.size }}</small>
+                </td>
+                <td>
+                  {% if file.is_file %}
+                      <a href="{{ url_for('preview_file', filename=file.name) }}" class="download-btn" style="background: #6b46c1;">👁️ Preview</a>
+                      <a href="{{ url_for('download', filename=file.name) }}" class="download-btn">📥 Download</a>
+                  {% else %}
+                      <a href="{{ url_for('browse', folder_path=file.name) }}" class="download-btn">📁 Open Folder</a>
+                  {% endif %}
+                  {% if role == "admin" %}
+                      <button onclick="handleDelete('{{ file.name }}', '{{ url_for('delete_file', filename=file.name) }}')" 
+                              class="delete-btn">
+                          🗑️ Delete
+                      </button>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>No files available.</p>
+      {% endif %}
+    </section>
+
+    <!-- Admin Controls -->
+    {% if role == "admin" %}
+      <section>
+        <h2>Admin Controls</h2>
+        <a href="{{ url_for('logs') }}" class="download-btn">View Activity Logs</a>
+      </section>
+    {% endif %}
+  </main>
+</body>
+</html>

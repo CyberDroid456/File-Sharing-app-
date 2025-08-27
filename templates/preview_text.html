@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Preview: {{ filename }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .preview-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin: 20px auto;
+            max-width: 90%;
+            overflow: hidden;
+        }
+        .preview-header {
+            background: #5a67d8;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .preview-content {
+            padding: 20px;
+            max-height: 70vh;
+            overflow: auto;
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .preview-actions {
+            padding: 15px 20px;
+            background: #f7fafc;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .line-numbers {
+            background: #e2e8f0;
+            padding: 20px 10px;
+            border-right: 2px solid #cbd5e0;
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Text Preview: {{ filename }}</h1>
+        <div>
+            <a href="{{ url_for('index') }}">🏠 Home</a>
+            <a href="{{ url_for('download', filename=filename) }}">💾 Download</a>
+            <a href="javascript:history.back()">⬅ Back</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="preview-container">
+            <div class="preview-header">
+                <h3>{{ filename }}</h3>
+                <span id="file-size"></span>
+            </div>
+            
+            <div class="preview-content" id="text-content">
+                <div style="text-align: center; padding: 40px; color: #718096;">
+                    <div class="spinner"></div>
+                    <p>Loading content...</p>
+                </div>
+            </div>
+
+            <div class="preview-actions">
+                <a href="{{ url_for('download', filename=filename) }}" class="download-btn">Download</a>
+                <a href="javascript:history.back()" class="download-btn">Go Back</a>
+                <a href="{{ url_for('index') }}" class="download-btn">Home</a>
+                <button onclick="copyToClipboard()" class="download-btn">Copy Text</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Load file content dynamically
+        fetch('{{ url_for("get_file_content", filename=filename) }}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('text-content').innerHTML = 
+                        `<div style="color: #e53e3e; padding: 20px; text-align: center;">
+                            <h3>⚠️ Error</h3>
+                            <p>${data.error}</p>
+                            <a href="{{ url_for('download', filename=filename) }}" class="download-btn">Download Instead</a>
+                        </div>`;
+                } else {
+                    const content = data.content;
+                    const lines = content.split('\n');
+                    const numberedContent = lines.map((line, index) => 
+                        `${(index + 1).toString().padStart(4, ' ')} | ${line}`
+                    ).join('\n');
+                    
+                    document.getElementById('text-content').textContent = numberedContent;
+                    document.getElementById('file-size').textContent = 
+                        `Size: ${new Blob([content]).size} bytes`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('text-content').innerHTML = 
+                    `<div style="color: #e53e3e; padding: 20px; text-align: center;">
+                        <h3>⚠️ Load Error</h3>
+                        <p>Could not load file content</p>
+                    </div>`;
+            });
+
+        function copyToClipboard() {
+            const content = document.getElementById('text-content').textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                alert('Text copied to clipboard!');
+            }).catch(err => {
+                alert('Failed to copy text');
+            });
+        }
+    </script>
+</body>
+</html>

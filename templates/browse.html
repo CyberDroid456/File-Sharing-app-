@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Browse Files - File Share</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</head>
+<body>
+  <header>
+    <h1>File Browser - {{ user }} ({{ role }})</h1>
+    <div>
+      <a href="{{ url_for('index') }}">🏠 Home</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for message in messages %}
+            <div class="flash-message">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Breadcrumbs -->
+    <nav style="margin-bottom: 20px;">
+      <a href="{{ url_for('browse') }}">📁 Root</a>
+      {% for crumb in breadcrumbs %}
+        &raquo; <a href="{{ url_for('browse', folder_path=crumb.path) }}">📁 {{ crumb.name }}</a>
+      {% endfor %}
+    </nav>
+
+    <!-- Upload to this folder -->
+    <section>
+      <h2>Upload to This Folder</h2>
+      <form id="uploadFolderForm" action="{{ url_for('upload_to_folder', folder_path=current_path) }}" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" id="folderFileInput" required>
+        <button type="submit">Upload Here</button>
+        
+        <div class="upload-progress" id="folderUploadProgress">
+          <div class="progress-bar" id="folderProgressBar"></div>
+          <div class="upload-status" id="folderUploadStatus">Uploading...</div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Create Subfolder -->
+    <section>
+      <h2>Create Subfolder</h2>
+      <form action="{{ url_for('create_subfolder', parent_path=current_path) }}" method="POST">
+        <input type="text" name="folder_name" placeholder="Enter subfolder name" required>
+        <button type="submit">Create Subfolder</button>
+      </form>
+    </section>
+
+    <!-- Files and Folders List -->
+    <section>
+      <h2>Contents</h2>
+      {% if items %}
+        <table class="file-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Size</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+              <tr>
+                <td>
+                  {% if item.is_file %}
+                    {% set ext = item.name.split('.')[-1].lower() %}
+                    <span class="file-icon 
+                      {% if ext in ['pdf'] %}file-pdf
+                      {% elif ext in ['png', 'jpg', 'jpeg', 'gif'] %}file-image  
+                      {% elif ext in ['doc', 'docx', 'txt'] %}file-document
+                      {% elif ext in ['zip', 'rar'] %}file-archive
+                      {% else %}file-other{% endif %}">
+                    </span>
+                    {{ item.name }}
+                  {% else %}
+                    <span style="font-size: 1.2em;">📁</span>
+                    <strong>{{ item.name }}</strong>
+                  {% endif %}
+                </td>
+                <td>{{ item.size }}</td>
+                <td>
+                  {% if item.is_file %}
+                    <a href="{{ url_for('download', filename=item.path) }}" class="download-btn">Download</a>
+                    {% if role == "admin" %}
+                     <button onclick="handleDelete('{{ item.name }}', '{{ url_for('delete_file', filename=item.path) }}')" 
+        class="delete-btn">
+    🗑️ Delete
+</button>
+                    {% endif %}
+                  {% else %}
+                    <a href="{{ url_for('browse', folder_path=item.path) }}" class="download-btn">Open</a>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>This folder is empty.</p>
+      {% endif %}
+    </section>
+  </main>
+
+  <script>
+    // Folder upload functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const folderForm = document.getElementById('uploadFolderForm');
+      if (folderForm) {
+        folderForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const fileInput = document.getElementById('folderFileInput');
+          if (fileInput.files.length === 0) {
+            showToast("Please select a file first", "error");
+            return;
+          }
+          
+          const formData = new FormData();
+          formData.append('file', fileInput.files[0]);
+          
+          fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              showToast(data.message, "success");
+              setTimeout(() => location.reload(), 1500);
+            } else {
+              showToast(data.message, "error");
+            }
+          })
+          .catch(error => {
+            showToast("Upload failed", "error");
+          });
+        });
+      }
+    });
+  </script>
+</body>
+</html>
