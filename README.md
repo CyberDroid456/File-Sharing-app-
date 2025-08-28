@@ -1,43 +1,86 @@
-📂 File-Sharing App
-A sleek, secure, and modern file-sharing web application built with Flask.
+# 📂 File-Sharing App
+
+**A sleek, secure, and modern file-sharing web application built with Flask.**
 Drag-and-drop uploads, live previews, role-based access, activity logging, and responsive design.
 
+![Demo](./assets/demo.gif) 
 
-✨ Features
-🚀 Fast Uploads – Drag & drop multiple files at once
-🔒 Role-Based Access – Admins, editors, and viewers with controlled permissions
-👁️ File Preview – Images, PDFs, and text files viewable right in the browser
-🔍 Instant Search – Find files instantly with smart filtering
-🌙 Dark / Light Mode – Switch seamlessly between themes
-📱 Responsive – Works on desktop, tablet, and mobile
-🖼️ Screenshots
-![Recording 2025-08-28 235428 (1)](https://github.com/user-attachments/assets/a72c3445-6ab5-4261-99eb-06cf1659b396)	
-⚙️ Getting Started
-Prerequisites
-Python 3.8+
-pip (package manager)
-Installation
+
+## ✨ Features
+
+* 🚀 **Fast Uploads** – Drag & drop multiple files at once
+* 🔒 **Role-Based Access** – Admins, editors, and viewers with controlled permissions
+* 👁️ **File Preview** – Images, PDFs, and text files viewable right in the browser
+* 🔍 **Instant Search** – Find files instantly with smart filtering
+* 🌙 **Dark / Light Mode** – Switch seamlessly between themes
+* 📱 **Responsive** – Works on desktop, tablet, and mobile
+
+
+
+## 🖼️ Screenshots
+
+| Upload & Preview         | Dark Mode              | Search in Action         |
+| ------------------------ | ---------------------- | ------------------------ |
+| ![](./assets/upload.png) | ![](./assets/dark.png) | ![](./assets/search.png) |
+
+
+
+## ⚙️ Getting Started
+
+### Prerequisites
+
+* Python 3.8+
+* pip (package manager)
+
+### Installation
+
+```bash
 git clone https://github.com/CyberDroid456/File-Sharing-app-.git
 cd File-Sharing-app-
 pip install -r requirements.txt
 python app.py
-Now open http://localhost:5000
- in your browser.
-🚀 Deployment
-Local (ngrok):
+```
+
+Now open [http://localhost:5000](http://localhost:5000) in your browser.
+
+
+
+## 🚀 Deployment
+
+* **Local (ngrok)**:
+
+```bash
 ngrok http 5000
-Cloud (Render, Railway, Heroku): Coming soon in roadmap
-🛡️ Security
-Encrypted file handling
-Role-based access control
-Configurable settings in config.py
-📅 Roadmap
- Cloud deployment guide
- Link expiry + password-protected links
- End-to-end encryption
- QR code sharing
- Mobile-friendly PWA support
-🤝 Contributing
+```
+
+* **Cloud (Render, Railway, Heroku)**: Coming soon in roadmap
+
+
+
+## 🛡️ Security
+
+* Encrypted file handling
+* Role-based access control
+* Configurable settings in `config.py`
+
+
+
+## 📅 Roadmap
+
+* [ ] Cloud deployment guide
+* [ ] Link expiry + password-protected links
+* [ ] End-to-end encryption
+* [ ] QR code sharing
+* [ ] Mobile-friendly PWA support
+
+
+
+## 🤝 Contributing
+
 Contributions welcome! Open an issue, suggest features, or submit a pull request.
-📜 License
-MIT License © 2025 CyberDroid456
+
+
+## 📜 License
+
+MIT License © 2025 [CyberDroid456](https://github.com/CyberDroid456)
+
