@@ -1,60 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Login</title>
+  <title>Login - File Share</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <style>
-    /* Mobile-specific login styles */
-    @media (max-width: 768px) {
-      .login-body {
-        padding: 20px;
-        align-items: flex-start;
-        padding-top: 50px;
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-      }
-      
-      .login-container {
-        width: 90%;
-        max-width: 400px;
-        margin: 0 auto;
-        padding: 25px;
-      }
-      
-      .login-container h2 {
-        font-size: 1.8rem;
-        text-align: center;
-        margin-bottom: 25px;
-      }
-      
-      .form-group input[type="text"],
-      .form-group input[type="password"] {
-        font-size: 16px;
-        padding: 14px;
-        width: 100%;
-        box-sizing: border-box;
-      }
-      
-      button[type="submit"] {
-        padding: 14px;
-        font-size: 16px;
-        width: 100%;
-      }
-    }
-    
-    /* Very small devices */
-    @media (max-width: 480px) {
-      .login-container {
-        padding: 20px;
-      }
-      
-      .login-container h2 {
-        font-size: 1.5rem;
-      }
-    }
-  </style>
+  
+  <!-- ADD THIS THEME SCRIPT -->
+  <script>
+    // Prevent flash of unstyled content for login page too
+    (function() {
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- END OF THEME SCRIPT -->
+  
 </head>
 <body class="login-body">
   <div class="login-container">
@@ -84,5 +46,7 @@
       <button type="submit">Login</button>
     </form>
   </div>
+  
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

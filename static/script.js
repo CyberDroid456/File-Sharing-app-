@@ -241,3 +241,61 @@ document.addEventListener('DOMContentLoaded', function() {
         uploadButton.textContent = 'Upload';
     }
 });
+// Theme Management
+function initTheme() {
+    // Get saved theme or use system preference
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    const initialTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+    setTheme(initialTheme);
+    
+    // Listen for system theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        if (!localStorage.getItem('theme')) {
+            setTheme(e.matches ? 'dark' : 'light');
+        }
+    });
+}
+
+function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    updateThemeButton(theme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+}
+
+function updateThemeButton(theme) {
+    const button = document.getElementById('themeToggle');
+    if (button) {
+        button.innerHTML = theme === 'dark' ? '☀️' : '🌙';
+        button.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+    }
+}
+
+// Add theme toggle button to page
+function addThemeButton() {
+    const button = document.createElement('button');
+    button.id = 'themeToggle';
+    button.className = 'theme-toggle';
+    button.innerHTML = '🌙';
+    button.title = 'Toggle dark mode';
+    button.onclick = toggleTheme;
+    document.body.appendChild(button);
+}
+
+// Initialize theme when DOM loads
+document.addEventListener('DOMContentLoaded', function() {
+    initTheme();
+    addThemeButton();
+    
+    // Add theme class to body for transitions
+    setTimeout(() => {
+        document.body.classList.add('theme-loaded');
+    }, 100);
+});
