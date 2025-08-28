@@ -3,7 +3,7 @@
 **A sleek, secure, and modern file-sharing web application built with Flask.**
 Drag-and-drop uploads, live previews, role-based access, activity logging, and responsive design.
 
-![Demo](./assets/demo.gif)
+
 
 
 ## ✨ Features
@@ -21,7 +21,7 @@ Drag-and-drop uploads, live previews, role-based access, activity logging, and r
 
 | Upload & Preview         | Dark Mode             |
 | ------------------------ | ----------------------|
-| ![](./assets/upload.png) | ![](./assets/dark.png)| 
+| ![](./assets/upload.png) | ![](./assets/darkmode.gif)| 
 
 
 
@@ -83,5 +83,6 @@ Contributions welcome! Open an issue, suggest features, or submit a pull request
 ## 📜 License
 
 MIT License © 2025 [CyberDroid456](https://github.com/CyberDroid456)
+
 
 
