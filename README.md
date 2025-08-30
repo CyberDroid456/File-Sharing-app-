@@ -66,6 +66,7 @@ ngrok http 5000
 
 ## 📅 Roadmap
 
+* [ ] Sharable links
 * [ ] Cloud deployment guide
 * [ ] Link expiry + password-protected links
 * [ ] End-to-end encryption
@@ -82,6 +83,7 @@ Contributions welcome! Open an issue, suggest features, or submit a pull request
 ## 📜 License
 
 MIT License © 2025 [CyberDroid456](https://github.com/CyberDroid456)
+
 
 
 
