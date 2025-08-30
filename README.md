@@ -96,4 +96,5 @@ Contributions welcome! Open an issue, suggest features, or submit a pull request
 
 ## 📜 License
 
-MIT
+
+MIT License © 2025 CyberDroid456
