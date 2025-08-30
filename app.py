@@ -2,12 +2,12 @@ from flask import Flask, render_template, request, redirect, url_for, send_from_
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
+from shared_links import create_share_link, get_share_link, increment_download_count, delete_share_link, get_user_shared_links, cleanup_expired_links
 
 # Load user configuration
 try:
     from config import *
 except ImportError:
-    # Fallback defaults if config.py doesn't exist
     APP_NAME = "File Share"
     MAX_FILE_SIZE = 50 * 1024 * 1024
     ALLOWED_EXTENSIONS = {"txt", "pdf", "png", "jpg", "jpeg", "gif"}
@@ -24,7 +24,6 @@ except ImportError:
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
-# Use config settings
 app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(LOG_FOLDER, exist_ok=True)
@@ -33,7 +32,6 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def log_action(action, filename=None):
-    """Log user actions"""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     user = session.get('username', 'anonymous')
     log_entry = f"{timestamp} {user} {action}"
@@ -105,29 +103,14 @@ def upload():
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         save_path = os.path.join(UPLOAD_FOLDER, filename)
-        
-        try:
-            # Save the file in chunks for large files
-            file.save(save_path)
-            log_action("uploaded", filename)
+        file.save(save_path)
+        log_action("uploaded", filename)
 
-            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-                return jsonify({"success": True, "message": f"{filename} uploaded!"})
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return jsonify({"success": True, "message": f"{filename} uploaded!"})
 
-            flash(f"{filename} uploaded successfully!")
-            return redirect(url_for("index"))
-            
-        except Exception as e:
-            # Clean up partially uploaded file
-            if os.path.exists(save_path):
-                os.remove(save_path)
-                
-            error_msg = f"Upload failed: {str(e)}"
-            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-                return jsonify({"success": False, "message": error_msg}), 500
-                
-            flash(error_msg)
-            return redirect(url_for("index"))
+        flash(f"{filename} uploaded successfully!")
+        return redirect(url_for("index"))
 
     flash("File type not allowed")
     return redirect(url_for("index"))
@@ -142,7 +125,6 @@ def create_folder():
         flash("Folder name cannot be empty")
         return redirect(url_for("index"))
     
-    # Remove special characters for safety
     folder_name = secure_filename(folder_name.strip())
     folder_path = os.path.join(UPLOAD_FOLDER, folder_name)
     
@@ -167,7 +149,7 @@ def download(filename):
     log_action("downloaded", filename)
     return send_from_directory(UPLOAD_FOLDER, filename)
 
-@app.route("/delete/<path:filename>", methods=["POST"])
+@app.route("/delete/<filename>", methods=["POST"])
 def delete_file(filename):
     if 'username' not in session or session.get('role') != 'admin':
         flash("Unauthorized")
@@ -177,30 +159,20 @@ def delete_file(filename):
     path = os.path.join(UPLOAD_FOLDER, filename)
 
     if os.path.exists(path):
-        try:
-            if os.path.isfile(path):
-                # Delete single file
-                os.remove(path)
-                log_action("deleted", filename)
-                message = f"{filename} deleted successfully!"
-                
-            else:
-                # Delete folder recursively
-                import shutil
-                shutil.rmtree(path)
-                log_action("deleted_folder", filename)
-                message = f"Folder '{filename}' and all contents deleted successfully!"
-            
-            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-                return jsonify({"success": True, "message": message})
-            
-            flash(message)
-            
-        except Exception as e:
-            error_msg = f"Delete failed: {str(e)}"
-            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-                return jsonify({"success": False, "message": error_msg}), 500
-            flash(error_msg)
+        if os.path.isfile(path):
+            os.remove(path)
+            log_action("deleted", filename)
+            message = f"{filename} deleted successfully!"
+        else:
+            import shutil
+            shutil.rmtree(path)
+            log_action("deleted_folder", filename)
+            message = f"Folder '{filename}' and all contents deleted successfully!"
+        
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return jsonify({"success": True, "message": message})
+        
+        flash(message)
     else:
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return jsonify({"success": False, "message": "File/folder not found"}), 404
@@ -223,119 +195,81 @@ def logs():
     
     return render_template("logs.html", logs=log_lines)
 
-@app.route("/browse")
-@app.route("/browse/<path:folder_path>")
-def browse(folder_path=""):
+# Shareable links routes
+@app.route("/share/<path:filename>", methods=["POST"])
+def share_file(filename):
+    if 'username' not in session:
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
+    
+    expires_days = int(request.form.get('expires_days', 7))
+    password = request.form.get('password') or None
+    
+    share_id = create_share_link(filename, session['username'], expires_days, password)
+    share_url = f"{request.host_url}s/{share_id}"
+    
+    return jsonify({
+        "success": True, 
+        "message": "Share link created!",
+        "share_url": share_url,
+        "share_id": share_id
+    })
+
+@app.route("/s/<share_id>", methods=["GET", "POST"])
+def shared_file_access(share_id):
+    share_data = get_share_link(share_id)
+    
+    if not share_data:
+        return "Share link not found or expired", 404
+    
+    # Check expiration
+    expires_at = datetime.strptime(share_data["expires_at"], "%Y-%m-%d %H:%M:%S")
+    if datetime.now() > expires_at:
+        delete_share_link(share_id)
+        return "Share link expired", 410
+    
+    # Password protection check
+    if share_data["password"]:
+        if request.method == "POST":
+            # Check password from form submission
+            if request.form.get("password") == share_data["password"]:
+                increment_download_count(share_id)
+                return send_from_directory(UPLOAD_FOLDER, share_data["file_path"])
+            else:
+                return render_template("share_password.html", 
+                                    share_id=share_id, 
+                                    error="Incorrect password")
+        else:
+            # Show password form for GET requests
+            return render_template("share_password.html", share_id=share_id)
+    
+    # No password required
+    increment_download_count(share_id)
+    return send_from_directory(UPLOAD_FOLDER, share_data["file_path"])
+
+@app.route("/my-shares")
+def my_shares():
     if 'username' not in session:
         return redirect(url_for('login'))
     
-    # Build full path safely
-    current_path = os.path.join(UPLOAD_FOLDER, folder_path)
+    user_links = get_user_shared_links(session['username'])
+    cleanup_expired_links()
     
-    # Security check: prevent directory traversal
-    if not os.path.realpath(current_path).startswith(os.path.realpath(UPLOAD_FOLDER)):
-        flash("Access denied")
-        return redirect(url_for("index"))
-    
-    if not os.path.exists(current_path):
-        flash("Folder does not exist")
-        return redirect(url_for("index"))
-    
-    # Get files and folders
-    items = []
-    for item in os.listdir(current_path):
-        item_path = os.path.join(current_path, item)
-        full_item_path = os.path.join(folder_path, item) if folder_path else item
-        
-        if os.path.isfile(item_path):
-            size_kb = round(os.path.getsize(item_path) / 1024, 1)
-            items.append({
-                "name": item, 
-                "size": f"{size_kb} KB", 
-                "is_file": True,
-                "path": full_item_path
-            })
-        else:
-            items.append({
-                "name": item, 
-                "size": "Folder", 
-                "is_file": False,
-                "path": full_item_path
-            })
-    
-    # Calculate breadcrumbs
-    breadcrumbs = []
-    if folder_path:
-        parts = folder_path.split('/')
-        for i in range(len(parts)):
-            breadcrumbs.append({
-                "name": parts[i],
-                "path": '/'.join(parts[:i+1])
-            })
-    
-    return render_template("browse.html", 
-                         items=items,
-                         current_path=folder_path,
-                         breadcrumbs=breadcrumbs,
+    return render_template("my_shares.html", 
+                         shares=user_links,
                          user=session['username'], 
                          role=session['role'])
 
-@app.route("/upload_to_folder/<path:folder_path>", methods=["POST"])
-def upload_to_folder(folder_path):
+@app.route("/delete-share/<share_id>", methods=["POST"])
+def delete_share(share_id):
     if 'username' not in session:
-        return redirect(url_for('login'))
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
     
-    # Security check
-    full_folder_path = os.path.join(UPLOAD_FOLDER, folder_path)
-    if not os.path.realpath(full_folder_path).startswith(os.path.realpath(UPLOAD_FOLDER)):
-        return jsonify({"success": False, "message": "Access denied"}), 403
+    share_data = get_share_link(share_id)
+    if not share_data or share_data["created_by"] != session['username']:
+        return jsonify({"success": False, "message": "Share not found"}), 404
     
-    if "file" not in request.files:
-        return jsonify({"success": False, "message": "No file part"})
-    
-    file = request.files["file"]
-    if file.filename == "":
-        return jsonify({"success": False, "message": "No selected file"})
-    
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        save_path = os.path.join(full_folder_path, filename)
-        file.save(save_path)
-        log_action("uploaded", f"{folder_path}/{filename}" if folder_path else filename)
-        
-        return jsonify({"success": True, "message": f"{filename} uploaded to folder!"})
-    
-    return jsonify({"success": False, "message": "File type not allowed"})
-
-@app.route("/create_subfolder/<path:parent_path>", methods=["POST"])
-def create_subfolder(parent_path):
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    
-    folder_name = request.form.get('folder_name')
-    if not folder_name:
-        flash("Folder name cannot be empty")
-        return redirect(url_for("browse", folder_path=parent_path))
-    
-    # Security check
-    full_parent_path = os.path.join(UPLOAD_FOLDER, parent_path)
-    if not os.path.realpath(full_parent_path).startswith(os.path.realpath(UPLOAD_FOLDER)):
-        flash("Access denied")
-        return redirect(url_for("browse", folder_path=parent_path))
-    
-    # Remove special characters for safety
-    folder_name = secure_filename(folder_name.strip())
-    folder_path = os.path.join(full_parent_path, folder_name)
-    
-    if os.path.exists(folder_path):
-        flash(f"Folder '{folder_name}' already exists!")
-    else:
-        os.makedirs(folder_path)
-        full_folder_name = f"{parent_path}/{folder_name}" if parent_path else folder_name
-        log_action("created_folder", full_folder_name)
-        flash(f"Folder '{folder_name}' created successfully!")
-    
-    return redirect(url_for("browse", folder_path=parent_path))
+    delete_share_link(share_id)
+    return jsonify({"success": True, "message": "Share deleted"})
 
 @app.route("/preview/<path:filename>")
 def preview_file(filename):
@@ -367,6 +301,7 @@ def preview_file(filename):
         # For unsupported types, offer download
         return redirect(url_for('download', filename=filename))
 
+# Add this missing route for text file content
 @app.route("/get_file_content/<path:filename>")
 def get_file_content(filename):
     if 'username' not in session:
@@ -386,23 +321,27 @@ def get_file_content(filename):
             content = f.read()
         return jsonify({"content": content})
     except UnicodeDecodeError:
-        try:
-            with open(file_path, 'r', encoding='latin-1') as f:
-                content = f.read()
-            return jsonify({"content": content})
-        except:
-            return jsonify({"error": "Cannot preview binary file"})
-    except:
-        return jsonify({"error": "Cannot read file"})
+        return jsonify({"error": "Cannot read file (binary or unsupported encoding)"})
+    except Exception as e:
+        return jsonify({"error": f"Error reading file: {str(e)}"})
 
 if __name__ == "__main__":
-    print(f"🚀 Starting File Share on localhost")
+    import socket
+    
+    def get_local_ip():
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            local_ip = s.getsockname()[0]
+            s.close()
+            return local_ip
+        except:
+            return "127.0.0.1"
+    
+    safe_ip = get_local_ip()
+    
+    print(f"🚀 Starting on SAFE interface: {safe_ip}")
     print(f"📍 Local: http://127.0.0.1:5000")
-    print(f"⏰ Timeout set to: 3600 seconds (1 hour) for large files")
+    print(f"🌐 Network: http://{safe_ip}:5000")
     
-    # Increase timeout for large files
-    from werkzeug.serving import WSGIRequestHandler
-    WSGIRequestHandler.protocol_version = "HTTP/1.1"
-    
-    # Run on localhost instead of network IP (this fixes ngrok compatibility)
-    app.run(host="127.0.0.1", port=5000, debug=DEBUG, threaded=True)
+    app.run(host=safe_ip, port=5000, debug=DEBUG)

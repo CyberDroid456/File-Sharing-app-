@@ -4,27 +4,25 @@
   <title>File Sharing Demo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <script src="{{ url_for('static', filename='script.js') }}" defer></script>
-<script>
-    // Prevent flash of unstyled content
+  <script>
     (function() {
         const savedTheme = localStorage.getItem('theme');
         const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', theme);
     })();
-</script>
+  </script>
 </head>
 <body>
   <header>
     <h1>Welcome, {{ user }} ({{ role }})</h1>
     <div>
+      <a href="{{ url_for('my_shares') }}">🔗 My Shares</a>
       <a href="{{ url_for('logout') }}">Logout</a>
     </div>
   </header>
 
   <main class="container">
-    <!-- Flash messages -->
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <div class="flash-messages">
@@ -35,14 +33,12 @@
       {% endif %}
     {% endwith %}
 
-    <!-- Upload Section -->
     <section>
       <h2>Upload a File</h2>
       <form id="uploadForm" action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
         <input type="file" name="file" id="fileInput" required>
         <button type="submit" id="uploadButton">Upload</button>
         
-        <!-- Progress Bar -->
         <div class="upload-progress" id="uploadProgress">
           <div class="progress-bar" id="progressBar"></div>
           <div class="upload-status" id="uploadStatus">Uploading...</div>
@@ -50,7 +46,6 @@
       </form>
     </section>
 
-    <!-- Folder Creation Section -->
     <section>
       <h2>Organize Files</h2>
       <form id="createFolderForm" action="{{ url_for('create_folder') }}" method="POST">
@@ -59,13 +54,11 @@
       </form>
     </section>
 
-    <!-- Search Section -->
     <div style="margin: 20px 0;">
       <input type="text" id="fileSearch" placeholder="🔍 Search files..." 
              style="padding: 10px; width: 100%; border-radius: 8px; border: 2px solid #e2e8f0;">
     </div>
 
-    <!-- File List Section -->
     <section>
       <h2>Available Files</h2>
       {% if files %}
@@ -93,16 +86,17 @@
                 </td>
                 <td>
                   {% if file.is_file %}
-                      <a href="{{ url_for('preview_file', filename=file.name) }}" class="download-btn" style="background: #6b46c1;">👁️ Preview</a>
-                      <a href="{{ url_for('download', filename=file.name) }}" class="download-btn">📥 Download</a>
+                    <a href="{{ url_for('preview_file', filename=file.name) }}" class="download-btn" style="background: #6b46c1;">👁️ Preview</a>
+                    <a href="{{ url_for('download', filename=file.name) }}" class="download-btn">📥 Download</a>
+                    <button onclick="openShareModal('{{ file.name }}')" class="share-btn">🔗 Share</button>
                   {% else %}
-                      <a href="{{ url_for('browse', folder_path=file.name) }}" class="download-btn">📁 Open Folder</a>
+                    <a href="{{ url_for('browse', folder_path=file.name) }}" class="download-btn">📁 Open Folder</a>
                   {% endif %}
                   {% if role == "admin" %}
-                      <button onclick="handleDelete('{{ file.name }}', '{{ url_for('delete_file', filename=file.name) }}')" 
-                              class="delete-btn">
-                          🗑️ Delete
-                      </button>
+                    <button onclick="handleDelete('{{ file.name }}', '{{ url_for('delete_file', filename=file.name) }}')" 
+                            class="delete-btn">
+                      🗑️ Delete
+                    </button>
                   {% endif %}
                 </td>
               </tr>
@@ -114,7 +108,6 @@
       {% endif %}
     </section>
 
-    <!-- Admin Controls -->
     {% if role == "admin" %}
       <section>
         <h2>Admin Controls</h2>
@@ -122,5 +115,43 @@
       </section>
     {% endif %}
   </main>
+
+  <!-- Share Modal -->
+  <div id="shareModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+      <span class="close" onclick="closeShareModal()">&times;</span>
+      <h3>🔗 Share File</h3>
+      <div id="shareModalContent">
+        <div class="form-group">
+          <label>Share Link:</label>
+          <input type="text" id="shareLinkInput" readonly 
+                 style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+        </div>
+        
+        <div class="form-group">
+          <label style="display: flex; align-items: center;">
+            <input type="checkbox" id="expireCheck" checked> 
+            <span style="margin-left: 8px;">Expire in 7 days</span>
+          </label>
+        </div>
+        
+        <div class="form-group">
+          <label style="display: flex; align-items: center;">
+            <input type="checkbox" id="passwordCheck"> 
+            <span style="margin-left: 8px;">Password protect</span>
+          </label>
+          <input type="password" id="sharePassword" placeholder="Enter password" 
+                 style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd; margin-top: 5px; display: none;">
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button onclick="copyShareLink()" class="download-btn">📋 Copy Link</button>
+          <button onclick="closeShareModal()" style="background: #a0aec0;">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

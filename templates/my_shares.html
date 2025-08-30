@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Shares - File Share</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script>
+    (function() {
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+</head>
+<body>
+  <header>
+    <h1>My Shared Files - {{ user }}</h1>
+    <div>
+      <a href="{{ url_for('index') }}">🏠 Home</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section>
+      <h2>Your Shared Links</h2>
+      {% if shares %}
+        <table class="file-table">
+          <thead>
+            <tr>
+              <th>Share ID</th>
+              <th>File Path</th>
+              <th>Created</th>
+              <th>Expires</th>
+              <th>Downloads</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for share_id, share in shares.items() %}
+              <tr>
+                <td><code>{{ share_id }}</code></td>
+                <td>{{ share.file_path }}</td>
+                <td>{{ share.created_at }}</td>
+                <td>{{ share.expires_at }}</td>
+                <td>{{ share.download_count }}</td>
+                <td>
+                  <button onclick="copyShareLink('{{ request.host_url }}s/{{ share_id }}')" 
+                          class="download-btn">📋 Copy</button>
+                  <button onclick="deleteShare('{{ share_id }}')" 
+                          class="delete-btn">🗑️ Delete</button>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>You haven't shared any files yet.</p>
+      {% endif %}
+    </section>
+  </main>
+
+  <script>
+    function copyShareLink(url) {
+      navigator.clipboard.writeText(url).then(() => {
+        alert('Share link copied to clipboard!');
+      }).catch(err => {
+        alert('Failed to copy link');
+      });
+    }
+
+    function deleteShare(shareId) {
+      if (confirm('Are you sure you want to delete this share?')) {
+        fetch(`/delete-share/${shareId}`, {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Share deleted successfully!');
+            location.reload();
+          } else {
+            alert('Failed to delete share');
+          }
+        })
+        .catch(error => {
+          alert('Error deleting share');
+        });
+      }
+    }
+  </script>
+</body>
+</html>

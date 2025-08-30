@@ -4,10 +4,7 @@
   <title>Login - File Share</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  
-  <!-- ADD THIS THEME SCRIPT -->
   <script>
-    // Prevent flash of unstyled content for login page too
     (function() {
         const savedTheme = localStorage.getItem('theme');
         const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -15,14 +12,11 @@
         document.documentElement.setAttribute('data-theme', theme);
     })();
   </script>
-  <!-- END OF THEME SCRIPT -->
-  
 </head>
 <body class="login-body">
   <div class="login-container">
     <h2>Login</h2>
 
-    <!-- Error message (if passed from Flask) -->
     {% if error %}
       <div class="error-message">{{ error }}</div>
     {% endif %}
