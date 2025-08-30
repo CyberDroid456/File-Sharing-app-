@@ -20,7 +20,7 @@ Drag-and-drop uploads, live previews, role-based access, activity logging, and r
 ## 🖼️ Screenshots
 
 Upload & Preview         | Dark Mode 
- ![](./assets/upload.png)  ![](./assets/darkmode.gif)
+ ![](./assets/Recording 2025-08-28 234101.gif)  ![](./assets/darkmode.gif)
 
 
 
