@@ -3,7 +3,58 @@ from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
 from shared_links import create_share_link, get_share_link, increment_download_count, delete_share_link, get_user_shared_links, cleanup_expired_links
+# Add these imports at the top of app.py
+import sys
+import os
+# Add these imports at the top of app.py
+import sys
+import os
 
+# Check if we're running as a PyInstaller executable
+if getattr(sys, 'frozen', False):
+    # Running as compiled executable
+    application_path = sys._MEIPASS
+    # Update paths for executable mode using config values
+    UPLOAD_FOLDER = os.path.join(application_path, "uploads")
+    LOG_FOLDER = os.path.join(application_path, "logs")
+else:
+    # Running as normal Python script
+    application_path = os.path.dirname(os.path.abspath(__file__))
+    # Use config paths
+    from config import UPLOAD_FOLDER, LOG_FOLDER
+
+# Ensure directories exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(LOG_FOLDER, exist_ok=True)
+
+# Load other config settings
+from config import MAX_FILE_SIZE, ALLOWED_EXTENSIONS, USERS, HOST, PORT, DEBUG
+
+app = Flask(__name__)
+app.secret_key = "supersecretkey"  # Consider moving this to config.py
+
+app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
+
+# The rest of your app.py remains the same, but use the config values...
+# Check if we're running as a PyInstaller executable
+if getattr(sys, 'frozen', False):
+    # Running as compiled executable
+    application_path = sys._MEIPASS
+    # Update paths for executable mode
+    UPLOAD_FOLDER = os.path.join(application_path, "uploads")
+    LOG_FOLDER = os.path.join(application_path, "logs")
+else:
+    # Running as normal Python script
+    application_path = os.path.dirname(os.path.abspath(__file__))
+    # Use original paths
+    UPLOAD_FOLDER = "uploads"
+    LOG_FOLDER = "logs"
+
+# Ensure directories exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(LOG_FOLDER, exist_ok=True)
+
+# The rest of your app.py remains the same...
 # Load user configuration
 try:
     from config import *
