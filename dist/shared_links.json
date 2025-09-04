@@ -102,5 +102,13 @@
     "expires_at": "2025-09-05 01:39:27",
     "password": null,
     "download_count": 2
+  },
+  "kz1foVMzK6Q": {
+    "file_path": "run.bat",
+    "created_by": "admin",
+    "created_at": "2025-09-01 08:50:48",
+    "expires_at": "2025-09-08 08:50:48",
+    "password": null,
+    "download_count": 1
   }
 }

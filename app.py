@@ -394,5 +394,5 @@ if __name__ == "__main__":
     print(f"🚀 Starting on SAFE interface: {safe_ip}")
     print(f"📍 Local: http://127.0.0.1:5000")
     print(f"🌐 Network: http://{safe_ip}:5000")
-    
+    print(f"📱 Other devices can access via the network URL above!")
     app.run(host=safe_ip, port=5000, debug=DEBUG)
